@@ -203,17 +203,21 @@ void recv_msg(int socket, char** buf, char** cmd, char** argument) {
 		show_log(*buf);
 	}
 }
-//show log
-void show_log(char* log) {
 
+//show log
+void show_log(char* log)
+{
 	if (log) {
-		//printf("%s", log);
-		//printf("\n");
-		FILE* file = fopen("wangxu", "a");
+		printf("%s", log);
+		printf("\n");
+		/*
+		FILE* file = fopen("server.log", "a");
 		fwrite(log, 1, strlen(log), file);
 		fclose(file);
+		*/
 	}
 }
+
 //
 int establish_tcp_connection(struct FtpClient* client) {
 	if (client->_dataip[0]) {
