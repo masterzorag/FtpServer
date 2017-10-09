@@ -7,13 +7,13 @@
 #include <arpa/inet.h>
 #include "_file.h"
 #define TRUE 1
+
 //Init socket
 void init_ftp_server(struct FtpServer* ftp) {
 	//strcpy(ftp->_relative_path, "/home/xu");//root path
 	ftp->_socket = socket(AF_INET, SOCK_STREAM, 0);
 	int err, sock_reuse = 1;
-	err = setsockopt(ftp->_socket, SOL_SOCKET, SO_REUSEADDR,
-			(char *) &sock_reuse, sizeof(sock_reuse));
+	err = setsockopt(ftp->_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &sock_reuse, sizeof(sock_reuse));
 	if (err != 0) {
 		printf("套接字可重用设置失败!/n");
 		exit(1);
@@ -25,8 +25,7 @@ void init_ftp_server(struct FtpServer* ftp) {
 	ftp->_server.sin_family = AF_INET;
 	ftp->_server.sin_addr.s_addr = INADDR_ANY;
 	ftp->_server.sin_port = htons(ftp->_port);
-	if (bind(ftp->_socket, (struct sockaddr*) &ftp->_server,
-			sizeof(struct sockaddr)) < 0) {
+	if (bind(ftp->_socket, (struct sockaddr*) &ftp->_server, sizeof(struct sockaddr)) < 0) {
 		perror("binding error");
 		exit(1);
 	}
@@ -39,7 +38,8 @@ void start_ftp_server(struct FtpServer* ftp) {
 	char log[100];
 	listen(ftp->_socket, 20);
 	socklen_t size = sizeof(struct sockaddr);
-	while (1) {
+	while (1)
+	{
 		int client;
 		struct sockaddr_in client_addr;
 		client = accept(ftp->_socket, (struct sockaddr*) &client_addr, &size);
@@ -55,16 +55,16 @@ void start_ftp_server(struct FtpServer* ftp) {
 			getsockname(client, (struct sockaddr*) &host_addr, &sock_length);
 			inet_ntop(AF_INET, &(host_addr.sin_addr), host_ip, INET_ADDRSTRLEN);
 			strcpy(ftp->_ip, host_ip);
-			//printf("%s", ftp->_ip);
+			printf("%s", ftp->_ip);
+
 			getpeername(client, (struct sockaddr*) &client_addr, &sock_length);
-			inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip,
-					INET_ADDRSTRLEN);
+			inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, INET_ADDRSTRLEN);
 			sprintf(log, "%s connect to the host.", client_ip);
 			show_log(log);
 
 		}
-		struct FtpClient* _c = (struct FtpClient*) malloc(
-				sizeof(struct FtpClient));
+		struct FtpClient* _c = (struct FtpClient*) malloc(sizeof(struct FtpClient));
+		
 		init_ftp_client(_c, ftp, client);
 		pthread_t pid;
 		pthread_create(&pid, NULL, communication, (void*) (_c));
@@ -77,8 +77,7 @@ void set_ftp_server_port(struct FtpServer* ftp, int port) {
 }
 
 //initial FtpClient
-void init_ftp_client(struct FtpClient* client, struct FtpServer* server,
-		int client_socket) {
+void init_ftp_client(struct FtpClient* client, struct FtpServer* server, int client_socket) {
 	client->_client_socket = client_socket;
 	strcpy(client->_ip, server->_ip);
 	strcpy(client->_root, server->_relative_path);
@@ -92,7 +91,6 @@ void init_ftp_client(struct FtpClient* client, struct FtpServer* server,
 	client->_name[0] = 0;
 	client->_pass[0] = 0;
 	client->_dataip[0] = 0;
-
 }
 
 //Communication 
@@ -156,10 +154,9 @@ void handle_client_command(struct FtpClient* client) {
 			strcat(buf, "cannot be recognized by server\r\n");
 			send_msg(client->_client_socket, buf);
 		}
-
 	}
-
 }
+
 //send message
 void send_msg(int socket, char* msg) {
 	int l = strlen(msg);
@@ -185,8 +182,8 @@ void recv_msg(int socket, char** buf, char** cmd, char** argument) {
 	int n = recv(socket, *buf, BUFFER_SIZE, 0);
 	if (n == 0) {
 
-		show_log("client leave the server.");
-		pthread_exit(NULL );
+		show_log("client leave the server.\n");
+		pthread_exit(NULL);
 	}
 	int index = _find_first_of(*buf, ' ');
 	if (index < 0) {
@@ -263,6 +260,7 @@ int establish_tcp_connection(struct FtpClient* client) {
 	return 1;
 
 }
+
 //
 void cancel_tcp_connection(struct FtpClient* client) {
 
@@ -279,6 +277,7 @@ void cancel_tcp_connection(struct FtpClient* client) {
 		client->_dataport = 0;
 	}
 }
+
 //
 int send_file(struct FtpClient* client, FILE* file) {
 	char buf[1000];
@@ -325,8 +324,7 @@ void handle_PASS(struct FtpClient* client, char* pass) {
 		 send_msg(client_socket, "230-prohibited. We make no guarantees, explicit or implicit, about the\r\n");
 		 send_msg(client_socket, "230-contents of this site. Use at your own risk.\r\n");
 		 send_msg(client_socket, "230-\r\n");*/
-		send_msg(client_socket,
-				"230 Guest login ok, access restrictions apply.\r\n");
+		send_msg(client_socket,	"230 Guest login ok, access restrictions apply.\r\n");
 	}
 }
 //
@@ -392,8 +390,7 @@ void handle_PORT(struct FtpClient* client, char* str) {
 	show_log(client->_dataip);
 	//show_log(client->_dataport);
 
-	char connect[] = "200 PORT command successful.\r\n";
-	send_msg(client->_client_socket, connect);
+	send_msg(client->_client_socket, "200 PORT command successful.\r\n");
 }
 //
 void handle_LIST(struct FtpClient* client) {
@@ -408,8 +405,7 @@ void handle_LIST(struct FtpClient* client) {
 
 	if ((pipe_fp = popen(list_cmd_info, "r")) == NULL ) {
 		show_log("pipe open error in cmd_list\n");
-		send_msg(client->_client_socket,
-				"451 the server had trouble reading the directory from disk\r\n");
+		send_msg(client->_client_socket, "451 the server had trouble reading the directory from disk\r\n");
 		return;
 	} else {
 		show_log("cannot establish connection.");
@@ -423,11 +419,10 @@ void handle_LIST(struct FtpClient* client) {
 	if (establish_tcp_connection(client)) {
 		show_log("establish tcp socket");
 	} else {
-		send_msg(client->_client_socket,
-				"425 TCP connection cannot be established.\r\n");
+		send_msg(client->_client_socket, "425 TCP connection cannot be established.\r\n");
 	}
-	send_msg(client->_client_socket,
-			"150 Data connection accepted; transfer starting.\r\n");
+	
+	send_msg(client->_client_socket, "150 Data connection accepted; transfer starting.\r\n");
 
 	char buf[BUFFER_SIZE * 10];
   memset(buf, 0, BUFFER_SIZE * 10);
@@ -436,12 +431,12 @@ void handle_LIST(struct FtpClient* client) {
 
 	int l = _find_first_of(buf, '\n');
 	send_msg(client->_data_socket, &(buf[l + 1]));
-	// send_msg(client->_client_socket, "426 TCP connection was established but then broken");
+//	send_msg(client->_client_socket, "426 TCP connection was established but then broken");
 	pclose(pipe_fp);
 	cancel_tcp_connection(client);
 	send_msg(client->_client_socket, "226 Transfer ok.\r\n");
-
 }
+
 //
 void handle_PASV(struct FtpClient* client) {
 
@@ -462,8 +457,7 @@ void handle_PASV(struct FtpClient* client) {
 	server.sin_family = AF_INET;
 	server.sin_addr.s_addr = inet_addr(client->_ip);
 	server.sin_port = htons(0);
-	if (bind(client->_data_server_socket, (struct sockaddr*) &server,
-			sizeof(struct sockaddr)) < 0) {
+	if (bind(client->_data_server_socket, (struct sockaddr*) &server,	sizeof(struct sockaddr)) < 0) {
 		perror("binding error");
 		send_msg(client->_client_socket, "426 pasv failure\r\n");
 		return;
@@ -571,8 +565,7 @@ void handle_STOR(struct FtpClient* client, char* path) {
 				break;
 			}
 			if (j < 0) {
-				send_msg(client->_client_socket,
-						"426 TCP connection was established but then broken\r\n");
+				send_msg(client->_client_socket, "426 TCP connection was established but then broken\r\n");
 				return;
 			}
 			fwrite(buf, 1, j, file);
@@ -614,6 +607,7 @@ void handle_RNTO(struct FtpClient* client) {
 //
 void handle_QUIT(struct FtpClient* client) {
 	send_msg(client->_client_socket, "221 goodby~\r\n");
+	free_ftp_client(client);
 }
 //
 void handle_CLNT(struct FtpClient* client) {
@@ -642,6 +636,8 @@ void free_ftp_client(struct FtpClient* client) {
 		close(client->_data_server_socket);
 	if (client->_data_socket > 0)
 		close(client->_data_socket);
+		
+  show_log("free_ftp_client");
 }
 
 //FtpServer define end
