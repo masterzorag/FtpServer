@@ -430,6 +430,7 @@ void handle_LIST(struct FtpClient* client) {
 			"150 Data connection accepted; transfer starting.\r\n");
 
 	char buf[BUFFER_SIZE * 10];
+  memset(buf, 0, BUFFER_SIZE * 10);
 
 	fread(buf, BUFFER_SIZE * 10 - 1, 1, pipe_fp);
 
