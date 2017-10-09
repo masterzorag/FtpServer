@@ -43,6 +43,26 @@ char* _substring(char* buf, int i, int len)
 	
 }
 
+//return the number of ch in buf
+//location storage the location of ch in buf
+//location need to be free in the outer of the function
+int _all_ch_in_string(char* buf, char ch, int** location)
+{
+	int i = 0;
+	int l = strlen(buf);
+	*location = (int*) malloc(sizeof(int) * l);
+	int n = 0;
+	for(i = 0; i < l; i ++)
+	{
+		if(buf[i] == ch)
+		{
+			(*location)[n] = i;
+			n ++;
+		}
+	}
+	return n;
+}
+
 //split buf with ch
 int  _split(char* buf, char ch, char*** result)
 {
@@ -75,26 +95,6 @@ int  _split(char* buf, char ch, char*** result)
 		free(loc);
 	}
 	return n + 1;	
-}
-
-//return the number of ch in buf
-//location storage the location of ch in buf
-//location need to be free in the outer of the function
-int _all_ch_in_string(char* buf, char ch, int** location)
-{
-	int i = 0;
-	int l = strlen(buf);
-	*location = (int*) malloc(sizeof(int) * l);
-	int n = 0;
-	for(i = 0; i < l; i ++)
-	{
-		if(buf[i] == ch)
-		{
-			(*location)[n] = i;
-			n ++;
-		}
-	}
-	return n;
 }
 
 //joint the array by char to one string
@@ -137,6 +137,34 @@ void _transfer_str_ip_port(char*buf, char* ip[], int* port)
 
 }
 
+/**
+ * parse int to string
+ */
+char* parseInt2String(int num)
+{
+	//the length of int is 32
+	char * temp = (char*)malloc(sizeof(char) * 32);
+	memset(temp, 0,sizeof(char) * 32);
+	int d, s, i = 0, j;
+	s = num;
+	while(s != 0)
+	{
+		d = s % 10;
+		s = s / 10;
+		temp[i ++] = d + '0';
+	}
+	char* result = (char*)malloc(sizeof(char) * (i + 1));
+	memset(result, 0, sizeof(char) * (i + 1));
+	i --;
+	for(j = i;j >= 0; j --)
+	{
+		result[j] = temp[i - j];
+	}
+	//release temp
+	free(temp);
+	return result;
+}
+
 //transfport ip and port to buf
 //memory be released out of  the function
 char* _transfer_ip_port_str(char* ip, int port)
@@ -177,33 +205,7 @@ char* _transfer_ip_port_str(char* ip, int port)
 	return buf;
 }
 
-/**
- * parse int to string
- */
-char* parseInt2String(int num)
-{
-	//the length of int is 32
-	char * temp = (char*)malloc(sizeof(char) * 32);
-	memset(temp, 0,sizeof(char) * 32);
-	int d, s, i = 0, j;
-	s = num;
-	while(s != 0)
-	{
-		d = s % 10;
-		s = s / 10;
-		temp[i ++] = d + '0';
-	}
-	char* result = (char*)malloc(sizeof(char) * (i + 1));
-	memset(result, 0, sizeof(char) * (i + 1));
-	i --;
-	for(j = i;j >= 0; j --)
-	{
-		result[j] = temp[i - j];
-	}
-	//release temp
-	free(temp);
-	return result;
-}
+
 char* parseChinesetoEnglish(char* _buf)
 {
 	char* buf = _buf;
