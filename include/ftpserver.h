@@ -5,6 +5,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
+
+int __isthreaded;
+
 //define FtpServer
 #define BUFFER_SIZE 1000	
 #define FTP_PORT 8000
